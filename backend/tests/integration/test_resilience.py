@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import signal
 import subprocess
+from pathlib import Path
 
 import pytest
 from fixtures.servers import crm
@@ -31,10 +32,27 @@ async def _approve(container, exposed: str) -> None:
 
 
 def _child_pids(module: str) -> list[int]:
-    out = subprocess.run(
-        ["pgrep", "-P", str(os.getpid()), "-f", module], capture_output=True, text=True, check=False
-    ).stdout
-    return [int(pid) for pid in out.split()]
+    proc = Path("/proc")
+    if not proc.is_dir():  # macOS: no procfs, but pgrep ships with the OS
+        out = subprocess.run(
+            ["pgrep", "-P", str(os.getpid()), "-f", module], capture_output=True, text=True, check=False
+        ).stdout
+        return [int(pid) for pid in out.split()]
+    # Slim Linux images (python:*-slim) have no procps, so read procfs directly there.
+    parent, needle = str(os.getpid()), module.encode()
+    pids: list[int] = []
+    for entry in proc.iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            stat = (entry / "stat").read_text()
+            cmdline = (entry / "cmdline").read_bytes()
+        except OSError:
+            continue
+        ppid = stat.rsplit(")", 1)[1].split()[1]
+        if ppid == parent and needle in cmdline:
+            pids.append(int(entry.name))
+    return pids
 
 
 async def test_dead_stdio_upstream_is_reconnected(container) -> None:
