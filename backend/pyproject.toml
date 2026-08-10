@@ -28,13 +28,13 @@ dependencies = [
   "structlog>=24.4",
   "anthropic>=1.0",
   "python-multipart>=0.0.20",
+  "httpx>=0.28",  # fixtures.demo, which ships in the wheel and image
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8.3",
   "pytest-asyncio>=0.25",
-  "httpx>=0.28",
   "mypy>=1.14",
   "ruff>=0.9",
   "types-jsonschema",
