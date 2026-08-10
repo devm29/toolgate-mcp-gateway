@@ -1,5 +1,5 @@
-# For completeness. Local development uses native binaries via `make services`;
-# this file is the reproducible all-in-one stack. Secrets come from .env (see .env.example):
+# The reproducible all-in-one stack (the README's first quickstart). `make services` is the native alternative.
+# Secrets come from .env (see .env.example):
 #   TOOLGATE_ADMIN_API_KEY, TOOLGATE_SESSION_SECRET, TOOLGATE_CONSOLE_SESSION_SECRET
 services:
   postgres:
