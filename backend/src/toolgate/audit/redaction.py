@@ -9,8 +9,8 @@ MAX_ITEMS = 50
 MAX_DEPTH = 6
 
 _SECRET_KEY = re.compile(
-    r"(pass(word|wd|phrase)?|secret|token|api[_-]?key|authorization|auth|cookie|session|credential|private[_-]?key|"
-    r"ssn|card[_-]?number|cvv|pin)$",
+    r"(pass(word|wd|phrase)?|pwd|secret|token|api[_-]?key|authorization|auth|cookie|session|credentials?|"
+    r"(private|secret|access|signing)[_-]?key|ssn|card[_-]?number|cvv|pin)$",
     re.IGNORECASE,
 )
 _SECRET_VALUE = (

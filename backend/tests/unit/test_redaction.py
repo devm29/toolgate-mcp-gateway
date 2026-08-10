@@ -10,6 +10,14 @@ def test_secret_keys_redacted() -> None:
     assert out["note"] == "fine"
 
 
+def test_key_suffixed_secret_names_redacted() -> None:
+    names = ["secret_key", "aws_secret_access_key", "accessKey", "signing-key", "db_pwd", "credentials"]
+    out = redact_arguments({name: "value-1234" for name in names} | {"keyword": "kept", "monkey": "kept"})
+    assert all(out[name] == REDACTED for name in names)
+    assert out["keyword"] == "kept"
+    assert out["monkey"] == "kept"
+
+
 def test_jwt_value_redacted() -> None:
     token = "eyJhbGciOi.eyJzdWIiOiAxMjN9.abcDEFghiJKL"
     out = redact_arguments({"body": f"Authorization: Bearer {token}"})
