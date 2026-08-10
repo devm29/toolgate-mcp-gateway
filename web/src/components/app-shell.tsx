@@ -46,9 +46,18 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
 
   return (
     <div className="grid min-h-dvh grid-cols-1 md:grid-cols-[240px_1fr]">
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-primary px-3 py-2 text-[13px] font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Skip to content
+      </a>
       <aside className="material sticky top-0 hidden h-dvh flex-col border-r border-border/60 bg-sidebar/80 backdrop-blur-2xl backdrop-saturate-150 md:flex">
         <div className="flex h-14 items-center gap-2.5 px-5">
-          <div className="grid size-7 place-items-center rounded-lg bg-primary text-[13px] font-semibold text-primary-foreground">
+          <div
+            aria-hidden
+            className="grid size-7 place-items-center rounded-lg bg-primary text-[13px] font-semibold text-primary-foreground"
+          >
             T
           </div>
           <div className="flex flex-col leading-none">
@@ -56,13 +65,14 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
             <span className="text-[11px] text-muted-foreground">MCP gateway</span>
           </div>
         </div>
-        <nav className="flex flex-1 flex-col gap-0.5 px-3 py-2">
+        <nav aria-label="Console" className="flex flex-1 flex-col gap-0.5 px-3 py-2">
           {NAV.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium transition-colors",
                   active
@@ -70,10 +80,10 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
                     : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
                 )}
               >
-                <item.icon className="size-4" strokeWidth={1.75} />
+                <item.icon className="size-4" strokeWidth={1.75} aria-hidden />
                 <span className="flex-1">{item.label}</span>
                 {"badge" in item && item.badge && pending > 0 ? (
-                  <Badge variant="danger" className="tabular">
+                  <Badge variant="danger" className="tabular" aria-label={`${pending} awaiting review`}>
                     {pending}
                   </Badge>
                 ) : null}
@@ -82,7 +92,7 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
           })}
         </nav>
         <div className="flex items-center gap-2 border-t border-border/60 px-4 py-3 text-[12px] text-muted-foreground">
-          <ScrollText className="size-3.5" strokeWidth={1.75} />
+          <ScrollText className="size-3.5" strokeWidth={1.75} aria-hidden />
           Append-only audit
         </div>
       </aside>
@@ -107,7 +117,9 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
             </Tooltip>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-7 md:px-8">{children}</main>
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-4 py-7 outline-none sm:px-5 md:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -115,7 +127,7 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
 
 function MobileNav({ pathname, pending }: { pathname: string; pending: number }) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto md:hidden">
+    <nav aria-label="Console" className="flex items-center gap-1 overflow-x-auto md:hidden">
       {NAV.map((item) => {
         const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
         return (
@@ -123,18 +135,19 @@ function MobileNav({ pathname, pending }: { pathname: string; pending: number })
             key={item.href}
             href={item.href}
             aria-label={item.label}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "grid size-9 place-items-center rounded-md",
+              "relative grid size-9 shrink-0 place-items-center rounded-md",
               active ? "bg-sidebar-accent text-foreground" : "text-muted-foreground",
             )}
           >
-            <item.icon className="size-4" strokeWidth={1.75} />
+            <item.icon className="size-4" strokeWidth={1.75} aria-hidden />
             {"badge" in item && item.badge && pending > 0 ? (
-              <span className="absolute -mt-5 ml-5 size-1.5 rounded-full bg-destructive" />
+              <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-destructive" aria-hidden />
             ) : null}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }
