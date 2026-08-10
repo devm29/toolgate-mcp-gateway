@@ -1,0 +1,51 @@
+[
+  {
+    "attack": "Argument injection",
+    "technique": "Extra unexpected argument smuggled into a tools/call",
+    "fixture": "fixtures/servers/github.py",
+    "decision": "rejected against the pinned input schema (additionalProperties: false)",
+    "detail": "schema validation ran before the upstream call"
+  },
+  {
+    "attack": "Credential file read",
+    "technique": "Agent coaxed into reading ~/.ssh/id_rsa through an approved file tool",
+    "fixture": "fixtures/servers/files.py",
+    "decision": "argument policy denied the path, call blocked and audited",
+    "detail": "deny rule matched the secret-path pattern"
+  },
+  {
+    "attack": "Cross-tool shadowing",
+    "technique": "Tool claims authority over another server's send_email tool",
+    "fixture": "fixtures/servers/shadowing.py",
+    "decision": "shadowing rule fired, quarantined pending review",
+    "detail": "risk=critical"
+  },
+  {
+    "attack": "Live rug pull",
+    "technique": "Definition changed mid-session and announced with tools/list_changed",
+    "fixture": "fixtures/servers/hot_swap.py",
+    "decision": "immediate re-sync, pin mismatch, quarantined, call blocked",
+    "detail": "no polling interval involved"
+  },
+  {
+    "attack": "Rug pull",
+    "technique": "Definition changed after approval (silent description swap)",
+    "fixture": "fixtures/servers/rug_pull.py",
+    "decision": "SHA-256 pin mismatch, re-quarantined, call blocked",
+    "detail": "approved hash no longer matches upstream hash"
+  },
+  {
+    "attack": "Tool poisoning",
+    "technique": "Hidden <IMPORTANT> instruction block directing the model to read secret files",
+    "fixture": "fixtures/servers/poisoned.py",
+    "decision": "scanned high-risk, quarantined pending review, call blocked",
+    "detail": "risk=critical score=100"
+  },
+  {
+    "attack": "Unicode smuggling",
+    "technique": "Invisible Unicode tag characters encode hidden text",
+    "fixture": "fixtures/servers/unicode_smuggling.py",
+    "decision": "invisible code points decoded and flagged, quarantined",
+    "detail": "risk=critical"
+  }
+]

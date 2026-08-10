@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "toolgate"
+version = "0.1.0"
+description = "Zero-trust MCP gateway and tool registry"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "mcp>=2.3,<3",
+  "fastapi>=0.120",
+  "uvicorn[standard]>=0.34",
+  "pydantic>=2.10",
+  "pydantic-settings>=2.6",
+  "authlib>=1.4",
+  "pyjwt[crypto]>=2.10",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30",
+  "alembic>=1.14",
+  "redis>=5.2",
+  "sse-starlette>=2.2",
+  "opentelemetry-api>=1.30",
+  "opentelemetry-sdk>=1.30",
+  "opentelemetry-exporter-otlp-proto-http>=1.30",
+  "jsonschema>=4.23",
+  "structlog>=24.4",
+  "anthropic>=1.0",
+  "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.25",
+  "httpx>=0.28",
+  "mypy>=1.14",
+  "ruff>=0.9",
+  "types-jsonschema",
+  "asgi-lifespan>=2.1",
+]
+
+[project.scripts]
+toolgate = "toolgate.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/toolgate", "fixtures"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src", "fixtures", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "ASYNC", "RUF", "S", "PT", "RET", "TC"]
+ignore = [
+  "S101",   # asserts are fine in tests and for type narrowing
+  "S105",   # token-type literals like "Bearer" are not secrets
+  "S106",
+  "RUF012",
+  "TC001", "TC002", "TC003",  # runtime-evaluated annotations are needed by pydantic/fastapi
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PT011", "PT018", "RUF059", "SIM117", "E501"]
+"fixtures/**" = ["S"]
+"migrations/**" = ["E501"]
+# Pool/container open files and touch pathlib at startup, and expose explicit timeout params by design.
+"src/toolgate/federation/pool.py" = ["ASYNC109", "ASYNC230"]
+"src/toolgate/container.py" = ["ASYNC240"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+packages = ["toolgate", "fixtures"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["authlib.*", "sse_starlette.*", "redis.*"]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+markers = [
+  "redteam: adversarial scenarios that must be blocked",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning:opentelemetry.*",
+]

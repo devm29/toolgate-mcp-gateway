@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+project_venv/
+
+# Node / Next.js
+node_modules/
+web/.next/
+.next/
+web/out/
+web/next-env.d.ts
+*.tsbuildinfo
+.pnpm-store/
+
+# Local data, logs, secrets
+.data/
+.data-web.log
+*.log
+.env
+.env.*
+!.env.example
+backend/.env
+web/.env.local
+tmp/
+logs/
+coverage/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Not part of this repository
+.github/
