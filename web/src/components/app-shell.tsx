@@ -56,9 +56,9 @@ function ConsoleShell({ pathname, children }: { pathname: string; children: Reac
         <div className="flex h-14 items-center gap-2.5 px-5">
           <div
             aria-hidden
-            className="grid size-7 place-items-center rounded-lg bg-primary text-[13px] font-semibold text-primary-foreground"
+            className="grid size-7 place-items-center rounded-md bg-primary font-mono text-[13px] font-medium text-primary-foreground"
           >
-            T
+            tg
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-[15px] font-semibold tracking-tight">Toolgate</span>
