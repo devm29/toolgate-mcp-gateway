@@ -3,8 +3,8 @@
 
 PY := backend/.venv/bin
 SHELL := /bin/bash
-# The project targets Python 3.12+; CI runs 3.12 and 3.13. Override with `make setup PYTHON=python3.12`.
-PYTHON ?= python3.13
+# The project targets Python 3.12+ (pinned in backend/.python-version). Override with `make setup PYTHON=python3.13`.
+PYTHON ?= python3.12
 LOAD_ENV := set -a && . ../.env && set +a
 
 .PHONY: help setup services services-stop migrate migrate-check seed seed-reset dev-api dev-web \
