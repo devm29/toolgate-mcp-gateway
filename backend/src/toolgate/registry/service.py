@@ -374,6 +374,10 @@ class RegistryService:
             )
         )
         result.changed.append(tool.exposed_name)
+        if tool.status is ToolStatus.REJECTED:
+            # An upstream cannot push a rejected tool back into the review queue by editing it.
+            # The change is still logged, and an admin can approve the new definition explicitly.
+            return
         if tool.approved_hash is not None:
             tool.status = ToolStatus.QUARANTINED
             result.quarantined.append(tool.exposed_name)

@@ -106,7 +106,7 @@ async def test_rejected_tool_stays_rejected_after_flapping(container) -> None:
     await container.registry.reconcile(upstream.id, [original, _alerts_def()])
 
     flapped = await _first_tool(container, "weather__get_forecast")
-    assert flapped.status is not ToolStatus.APPROVED
+    assert flapped.status is ToolStatus.REJECTED
     assert flapped.approved_hash is None
     assert "weather__get_forecast" not in {t.exposed_name for t in await container.registry.servable_tools()}
     detail = await container.registry.tool_detail(tool.id)
@@ -123,7 +123,28 @@ async def test_rejecting_quarantined_tool_drops_pin(container) -> None:
     await container.registry.reconcile(upstream.id, [drifted, _alerts_def()])
     await container.registry.reject(tool.id, "user:alice")
     await container.registry.reconcile(upstream.id, [original, _alerts_def()])
-    assert (await _first_tool(container, "weather__get_forecast")).status is not ToolStatus.APPROVED
+    assert (await _first_tool(container, "weather__get_forecast")).status is ToolStatus.REJECTED
+
+
+async def test_changed_rejected_tool_stays_out_of_review_queue(container) -> None:
+    upstream, _ = await register_and_sync(container, "weather", "weather")
+    await detach(container, upstream.id)
+    tool = await _first_tool(container, "weather__get_forecast")
+    original = ToolDefinition.model_validate(tool.current_definition)
+    await container.registry.reject(tool.id, "user:alice", "not needed")
+
+    edited = original.model_copy(update={"description": original.description + " Now with hourly data."})
+    result = await container.registry.reconcile(upstream.id, [edited, _alerts_def()])
+
+    assert "weather__get_forecast" in result.changed
+    refreshed = await _first_tool(container, "weather__get_forecast")
+    assert refreshed.status is ToolStatus.REJECTED
+    queued = {item.tool.exposed_name for item in await container.registry.approval_queue()}
+    assert "weather__get_forecast" not in queued
+
+    # An admin can still approve the new definition on purpose.
+    approved = await container.registry.approve(refreshed.id, refreshed.current_hash, "user:alice")
+    assert approved.status is ToolStatus.APPROVED
 
 
 async def test_approval_refuses_unenforceable_schema(container) -> None:
