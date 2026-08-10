@@ -185,5 +185,16 @@ async def test_audit_stream_delivers_live_events_and_replays_gap(container, sett
     assert [e["tool_name"] for e in received] == ["t__x", "t__y"]
 
 
+async def test_audit_stream_writes_a_frame_before_any_event(container, settings, admin_headers) -> None:
+    from toolgate.app import create_app
+
+    app = create_app(settings, container=container, start_federation=False)
+    async with serve(app, free_port()) as base:
+        async with httpx.AsyncClient(base_url=base, timeout=10) as http:
+            async with http.stream("GET", "/api/v1/audit/stream", headers=admin_headers) as response:
+                first = await asyncio.wait_for(anext(response.aiter_lines()), timeout=2)
+    assert first in {": connected", "retry: 3000"}
+
+
 async def test_audit_stream_requires_admin(client: AsyncClient) -> None:
     assert (await client.get("/api/v1/audit/stream")).status_code == 401

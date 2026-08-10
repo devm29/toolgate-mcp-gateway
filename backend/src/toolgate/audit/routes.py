@@ -14,6 +14,7 @@ from toolgate.container import Container, get_container
 
 router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
 ContainerDep = Annotated[Container, Depends(get_container)]
+RECONNECT_DELAY_MS = 3000
 
 
 @router.get("", response_model=CursorPage[AuditEventOut])
@@ -55,6 +56,10 @@ async def stream(
 
             task = asyncio.create_task(pump())
             try:
+                # Write a frame straight away: relays such as the console's route handler only flush the response
+                # headers with the first body chunk, so without it the client sat on "connecting" until the first
+                # keep-alive ping 15 seconds later.
+                yield {"retry": RECONNECT_DELAY_MS, "comment": "connected"}
                 high_water = 0
                 if last_event_id and last_event_id.isdigit():
                     for event in await container.audit.replay_after(int(last_event_id)):
