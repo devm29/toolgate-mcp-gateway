@@ -58,17 +58,17 @@ class AuditService:
 
     async def stats(self, *, hours: int = 24, now: datetime | None = None) -> AuditStats:
         current = now or datetime.now(UTC)
-        since = current - timedelta(hours=hours)
+        # The window is the current hour plus the hours-1 before it, so the hourly buckets add up to the totals.
+        start = current.replace(minute=0, second=0, microsecond=0) - timedelta(hours=hours - 1)
         async with self._sessions() as session:
             repo = AuditRepository(session)
-            counts = await repo.decision_counts(since)
-            errors = await repo.error_count(since)
-            p95 = await repo.p95_latency(since)
-            hourly_rows = await repo.hourly(since)
-            top = await repo.top_tools(since)
+            counts = await repo.decision_counts(start)
+            errors = await repo.error_count(start)
+            p95 = await repo.p95_latency(start)
+            hourly_rows = await repo.hourly(start)
+            top = await repo.top_tools(start)
         by_decision = {d: counts.get(d.value, 0) for d in Decision}
         seen = {row[0].astimezone(UTC): row for row in hourly_rows}
-        start = since.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         hourly: list[HourlyBucket] = []
         for offset in range(hours):
             hour = start + timedelta(hours=offset)

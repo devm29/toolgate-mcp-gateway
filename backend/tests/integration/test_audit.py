@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 import pytest
 from sqlalchemy import text
 
@@ -42,6 +44,17 @@ async def test_stats_counts_decisions(container) -> None:
     assert stats.blocked == 1
     assert stats.total == 3
     assert stats.top_tools[0].tool_name == "weather__x"
+
+
+async def test_hourly_buckets_add_up_to_totals(container) -> None:
+    event = await container.audit.record(
+        AuditEventCreate(request_id="r", principal="p", tool_name="weather__x", decision=Decision.ALLOWED)
+    )
+    # Whether the event sits in the oldest hour shown or just outside the window, chart and totals must agree.
+    for later in (timedelta(hours=23, minutes=1), timedelta(hours=24) - timedelta(seconds=1)):
+        stats = await container.audit.stats(hours=24, now=event.occurred_at + later)
+        assert len(stats.hourly) == 24
+        assert sum(bucket.allowed for bucket in stats.hourly) == stats.allowed
 
 
 async def test_cursor_pagination(container) -> None:
