@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { UpstreamStatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,9 @@ export default function ServersPage() {
         }
       />
 
-      {upstreams.isLoading ? (
+      {upstreams.isError && !upstreams.data ? (
+        <QueryError what="upstream servers" error={upstreams.error} onRetry={() => void upstreams.refetch()} />
+      ) : upstreams.isLoading ? (
         <div className="grid gap-3 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />

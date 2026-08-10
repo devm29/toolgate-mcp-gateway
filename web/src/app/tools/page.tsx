@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { RiskBadge } from "@/components/risk-badge";
 import { ToolStatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -68,7 +69,7 @@ export default function ToolsPage() {
           />
         </div>
         <Select value={status} onValueChange={(value) => setStatus(value as ToolStatus | "all")}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40" aria-label="Filter by status">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -80,7 +81,7 @@ export default function ToolsPage() {
           </SelectContent>
         </Select>
         <Select value={risk} onValueChange={(value) => setRisk(value as RiskLevel | "all")}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-36" aria-label="Filter by risk">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -94,7 +95,11 @@ export default function ToolsPage() {
       </div>
 
       <Card className="overflow-hidden p-0">
-        {tools.isLoading ? (
+        {tools.isError && !tools.data ? (
+          <div className="p-4">
+            <QueryError what="tools" error={tools.error} onRetry={() => void tools.refetch()} />
+          </div>
+        ) : tools.isLoading ? (
           <div className="flex flex-col gap-px p-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-10" />

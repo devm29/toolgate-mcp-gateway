@@ -4,6 +4,7 @@ import { Activity, Gauge, Server, ShieldAlert, ShieldCheck, Wrench } from "lucid
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,13 +25,16 @@ const RISK_COLOR: Record<RiskLevel, string> = {
 };
 
 export default function OverviewPage() {
-  const { data, isLoading } = useOverview();
+  const overview = useOverview();
+  const { data } = overview;
 
   return (
     <div>
       <PageHeader title="Overview" description="Health of the gateway and the last 24 hours of traffic." />
 
-      {isLoading || !data ? (
+      {overview.isError && !data ? (
+        <QueryError what="the overview" error={overview.error} onRetry={() => void overview.refetch()} />
+      ) : !data ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />

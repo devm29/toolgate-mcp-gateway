@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { RiskBadge } from "@/components/risk-badge";
 import { ToolStatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,9 @@ export default function ApprovalsPage() {
         description="New tools and post-approval changes wait here until an administrator reviews them."
       />
 
-      {approvals.isLoading ? (
+      {approvals.isError && !approvals.data ? (
+        <QueryError what="the approval queue" error={approvals.error} onRetry={() => void approvals.refetch()} />
+      ) : approvals.isLoading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-24" />

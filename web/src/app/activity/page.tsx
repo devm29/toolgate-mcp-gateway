@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { DecisionBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,7 +145,11 @@ function AuditHistory() {
         </Select>
       </div>
       <Card className="overflow-hidden p-0">
-        {log.isLoading ? (
+        {log.isError && events.length === 0 ? (
+          <div className="p-4">
+            <QueryError what="the audit history" error={log.error} onRetry={() => void log.refetch()} />
+          </div>
+        ) : log.isLoading ? (
           <div className="flex flex-col gap-px p-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-10" />

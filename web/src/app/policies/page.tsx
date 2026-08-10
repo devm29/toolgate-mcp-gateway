@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QueryError } from "@/components/query-error";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +60,9 @@ export default function PoliciesPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="flex flex-col gap-3">
-          {policies.isLoading ? (
+          {policies.isError && !policies.data ? (
+            <QueryError what="policies" error={policies.error} onRetry={() => void policies.refetch()} />
+          ) : policies.isLoading ? (
             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28" />)
           ) : policies.data && policies.data.length > 0 ? (
             policies.data.map((policy) => (
